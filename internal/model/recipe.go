@@ -4,7 +4,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// Recipe represents a recipe in the system.
 type Recipe struct {
 	ID      uuid.UUID     `json:"id"`
 	Author  string        `json:"author"`

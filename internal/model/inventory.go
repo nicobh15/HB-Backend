@@ -6,11 +6,10 @@ import (
 	"github.com/google/uuid"
 )
 
-// InventoryItem represents an item in the inventory.
 type InventoryItem struct {
 	ItemID         uuid.UUID  `json:"itemID"`
 	HouseholdID    uuid.UUID  `json:"householdID"`
-	Category       string     `json:"category"` // e.g., "Kitchen", "Bar", "Storage"
+	Category       string     `json:"category"`
 	Name           string     `json:"name"`
 	Quantity       int        `json:"quantity"`
 	ExpirationDate *time.Time `json:"expirationDate,omitempty"`
