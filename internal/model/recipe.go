@@ -15,6 +15,8 @@ type RecipeContent struct {
 	Name         string       `json:"name"`
 	Ingredients  []Ingredient `json:"ingredients"`
 	Instructions []string     `json:"instructions"`
+	PrepTime     *int         `json:"prepTime,omitempty"`
+	TotalTime    *int         `json:"totalTime,omitempty"`
 }
 
 type Ingredient struct {
