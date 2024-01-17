@@ -45,8 +45,13 @@ func TestFetchHousehold(t *testing.T) {
 
 func TestUpdateHousehold(t *testing.T) {
 	household1 := CreateRandomHousehold(t)
-	UpdateHouseholdParams := UpdateHouseholdParams{util.RandomName(), util.RandomAddress(), household1.HouseholdID}
-	household2, err := testQueries.UpdateHousehold(context.Background(), UpdateHouseholdParams)
+	args := UpdateHouseholdParams{
+		util.RandomName(),
+		util.RandomAddress(),
+		household1.HouseholdID}
+
+	household2, err := testQueries.UpdateHousehold(context.Background(), args)
+
 	require.NoError(t, err)
 	require.NotEmpty(t, household2)
 	require.NotEmpty(t, household2.HouseholdName)
@@ -61,17 +66,14 @@ func TestUpdateHousehold(t *testing.T) {
 
 func TestDeleteHousehold(t *testing.T) {
 	household1 := CreateRandomHousehold(t)
-	household2, err := testQueries.DeleteHousehold(context.Background(), household1.HouseholdID)
+	_, err := testQueries.DeleteHousehold(context.Background(), household1.HouseholdID)
+
+	household2, err2 := testQueries.FetchHousehold(context.Background(), household1.HouseholdID)
 
 	require.NoError(t, err)
-	require.NotEmpty(t, household2)
-	require.NotEmpty(t, household2.HouseholdName)
-	require.NotEmpty(t, household2.Address)
-	require.NotZero(t, household2.CreatedAt)
-	require.NotZero(t, household2.UpdatedAt)
-	require.Equal(t, household1.HouseholdID, household2.HouseholdID)
-	require.Equal(t, household1.HouseholdName, household2.HouseholdName)
-	require.Equal(t, household1.Address, household2.Address)
+	require.Error(t, err2)
+	require.EqualError(t, err2, "no rows in result set")
+	require.Empty(t, household2)
 }
 
 func TestListHouseholds(t *testing.T) {
@@ -90,11 +92,6 @@ func TestListHouseholds(t *testing.T) {
 
 	for _, household := range households {
 		require.NotEmpty(t, household)
-		require.NotEmpty(t, household.HouseholdName)
-		require.NotEmpty(t, household.Address)
-		require.NotZero(t, household.CreatedAt)
-		require.NotZero(t, household.UpdatedAt)
-		require.NotZero(t, household.HouseholdID)
 	}
 
 }

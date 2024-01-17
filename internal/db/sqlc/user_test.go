@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
@@ -84,17 +85,88 @@ func TestFetchUserByEmail(t *testing.T) {
 }
 
 func TestListHouseholdMembers(t *testing.T) {
+	household := CreateRandomHousehold(t)
+
+	for i := 0; i < 5; i++ {
+		user := CreateRandomUser(t)
+		arg := UpdateUserParams{
+			nil,
+			nil,
+			nil,
+			nil,
+			nil,
+			household.HouseholdID,
+			user.UserID}
+		testQueries.UpdateUser(context.Background(), arg)
+	}
+	args := ListHouseholdMembersParams{
+		HouseholdID: household.HouseholdID,
+		Limit:       5,
+		Offset:      0,
+	}
+
+	users, err := testQueries.ListHouseholdMembers(context.Background(), args)
+	require.NoError(t, err)
+	require.Len(t, users, 5)
+	require.NotEmpty(t, users)
 
 }
 
 func TestListUsers(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		CreateRandomUser(t)
+	}
+
+	arg := ListUsersParams{
+		Limit:  5,
+		Offset: 5,
+	}
+
+	users, err := testQueries.ListUsers(context.Background(), arg)
+	require.NoError(t, err)
+	require.Len(t, users, 5)
+
+	for _, user := range users {
+		require.NotEmpty(t, user)
+	}
 
 }
 
 func TestUpdateUser(t *testing.T) {
+	user1 := CreateRandomUser(t)
+	household := CreateRandomHousehold(t)
+
+	arg := UpdateUserParams{
+		util.RandomName(),     // Username
+		util.RandomEmail(),    // Email
+		util.RandomName(),     // First Name
+		util.RandomName(),     // PasswordHash
+		util.RandomName(),     // Role
+		household.HouseholdID, // HouseholdID
+		user1.UserID}          // Target
+
+	user2, err := testQueries.UpdateUser(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+	require.NotEqual(t, user2.Username, user1.Username)
+	require.NotEqual(t, user2.Email, user1.Email)
+	require.NotEqual(t, user2.FirstName, user1.FirstName)
+	require.NotEqual(t, user2.PasswordHash, user1.PasswordHash)
+	require.NotEqual(t, user2.HouseholdID, user1.HouseholdID)
+	require.NotEqual(t, user2.Role, user1.Role)
+	require.NotZero(t, user2.CreatedAt)
+	require.WithinDuration(t, user2.UpdatedAt.Time, user1.UpdatedAt.Time, time.Second)
 
 }
 
 func TestDeleteUser(t *testing.T) {
+	user1 := CreateRandomUser(t)
+	_, err := testQueries.DeleteUser(context.Background(), user1.Email)
 
+	user2, err2 := testQueries.FetchUserByEmail(context.Background(), user1.Email)
+	require.NoError(t, err)
+	require.Error(t, err2)
+	require.EqualError(t, err2, "no rows in result set")
+	require.Empty(t, user2)
 }

@@ -1,9 +1,11 @@
 package util
 
 import (
+	"fmt"
 	"math/rand"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -44,4 +46,17 @@ func RandomName() string {
 
 func RandomAddress() pgtype.Text {
 	return (pgtype.Text{String: RandomString(10), Valid: true})
+}
+
+func RandomUUID() pgtype.UUID {
+	newUUID, err := uuid.NewRandom()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var pgUUID pgtype.UUID
+	copy(pgUUID.Bytes[:], newUUID[:])
+	pgUUID.Valid = true
+
+	return (pgUUID)
 }

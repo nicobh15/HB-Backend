@@ -231,26 +231,35 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users 
-SET username = $1, email = $2, password_hash = $3, role = $4, household_id = $5, updated_at = now()
-WHERE user_id = $6
+SET 
+    username = COALESCE(NULLIF($1, ''), username),
+    email = COALESCE(NULLIF($2, ''), email),
+    first_name = COALESCE(NULLIF($3, ''), first_name),
+    password_hash = COALESCE(NULLIF($4, ''), password_hash),
+    role = COALESCE(NULLIF($5, ''), role),
+    household_id = COALESCE($6, household_id),
+    updated_at = now()
+WHERE user_id = $7
 RETURNING user_id, username, email, first_name, password_hash, role, household_id, created_at, updated_at
 `
 
 type UpdateUserParams struct {
-	Username     string      `json:"username"`
-	Email        string      `json:"email"`
-	PasswordHash string      `json:"password_hash"`
-	Role         string      `json:"role"`
-	HouseholdID  pgtype.UUID `json:"household_id"`
-	UserID       pgtype.UUID `json:"user_id"`
+	Column1     interface{} `json:"column_1"`
+	Column2     interface{} `json:"column_2"`
+	Column3     interface{} `json:"column_3"`
+	Column4     interface{} `json:"column_4"`
+	Column5     interface{} `json:"column_5"`
+	HouseholdID pgtype.UUID `json:"household_id"`
+	UserID      pgtype.UUID `json:"user_id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, updateUser,
-		arg.Username,
-		arg.Email,
-		arg.PasswordHash,
-		arg.Role,
+		arg.Column1,
+		arg.Column2,
+		arg.Column3,
+		arg.Column4,
+		arg.Column5,
 		arg.HouseholdID,
 		arg.UserID,
 	)
