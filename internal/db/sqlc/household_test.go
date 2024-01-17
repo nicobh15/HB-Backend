@@ -1,4 +1,4 @@
-package test
+package db
 
 import (
 	"context"
@@ -6,13 +6,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
 	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateHousehold(t *testing.T) {
-	args := db.CreateHouseholdParams{
+	args := CreateHouseholdParams{
 		HouseholdName: util.RandomName(),
 		Address:       util.RandomAddress(),
 	}
