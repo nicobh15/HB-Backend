@@ -3,16 +3,15 @@ package util
 import (
 	"math/rand"
 	"strings"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
+// func init() {
+// 	rand.Seed(time.Now().UnixNano())
+// }
 
 func RandomInt(min, max int64) int64 {
 	return (min + rand.Int63n(max-min+1))
