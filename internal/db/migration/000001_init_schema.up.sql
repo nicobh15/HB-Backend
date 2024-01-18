@@ -27,7 +27,7 @@ CREATE TABLE "inventory" (
   "name" varchar NOT NULL,
   "quantity" integer NOT NULL,
   "expiration_date" date,
-  "purchase_date" date NOT NULL,
+  "purchase_date" date DEFAULT (now()),
   "created_at" timestamptz DEFAULT (now()),
   "updated_at" timestamptz DEFAULT (now()),
   "location" varchar
@@ -37,7 +37,9 @@ CREATE TABLE "recipes" (
   "id" UUID PRIMARY KEY DEFAULT (uuid_generate_v4()),
   "author_id" UUID NOT NULL,
   "visibility" int NOT NULL DEFAULT '0',
-  "data" jsonb
+  "data" jsonb,
+  "created_at" timestamptz DEFAULT (now()),
+  "updated_at" timestamptz DEFAULT (now())
 );
 
 CREATE INDEX "idx_users_username" ON "users" ("username");

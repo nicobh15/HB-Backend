@@ -34,8 +34,15 @@ OFFSET $2;
 
 -- name: UpdateUser :one
 UPDATE users 
-SET username = $1, email = $2, password_hash = $3, role = $4, household_id = $5, updated_at = now()
-WHERE user_id = $6
+SET 
+    username = COALESCE($1, username),
+    email = COALESCE($2, email),
+    first_name = COALESCE($3, first_name),
+    password_hash = COALESCE($4, password_hash),
+    role = COALESCE($5, role),
+    household_id = COALESCE($6, household_id),
+    updated_at = now()
+WHERE user_id = $7
 RETURNING *;
 
 -- name: DeleteUser :one

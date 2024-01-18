@@ -30,7 +30,7 @@ type Querier interface {
 	ListInventoryItems(ctx context.Context, arg ListInventoryItemsParams) ([]Inventory, error)
 	ListInventoryItemsByCategory(ctx context.Context, arg ListInventoryItemsByCategoryParams) ([]Inventory, error)
 	ListInventoryItemsByLocation(ctx context.Context, arg ListInventoryItemsByLocationParams) ([]Inventory, error)
-	ListRecipes(ctx context.Context, limit int32) ([]Recipe, error)
+	ListRecipes(ctx context.Context, arg ListRecipesParams) ([]Recipe, error)
 	ListRecipesByAuthor(ctx context.Context, arg ListRecipesByAuthorParams) ([]Recipe, error)
 	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdateHousehold(ctx context.Context, arg UpdateHouseholdParams) (Household, error)

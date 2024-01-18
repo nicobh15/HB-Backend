@@ -13,15 +13,20 @@ LIMIT 1;
 -- name: ListRecipesByAuthor :many
 SELECT * FROM recipes
 WHERE author_id = $1
-LIMIT $2;
+LIMIT $2
+OFFSET $3;
 
 -- name: ListRecipes :many
 SELECT * FROM recipes
-LIMIT $1;
+LIMIT $1
+OFFSET $2;
 
 -- name: UpdateRecipe :one
 UPDATE recipes
-SET author_id = $1, visibility = $2, data = $3
+SET 
+    author_id = COALESCE($1, author_id),
+    visibility = COALESCE($2, visibility),
+    data = COALESCE($3, data)
 WHERE id = $4
 RETURNING *;
 

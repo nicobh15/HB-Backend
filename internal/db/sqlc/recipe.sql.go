@@ -16,7 +16,7 @@ INSERT INTO recipes (
     author_id, visibility, data
     ) VALUES ( 
         $1, $2, $3
-    ) RETURNING id, author_id, visibility, data
+    ) RETURNING id, author_id, visibility, data, created_at, updated_at
 `
 
 type CreateRecipeParams struct {
@@ -33,6 +33,8 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 		&i.AuthorID,
 		&i.Visibility,
 		&i.Data,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -40,7 +42,7 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 const deleteRecipe = `-- name: DeleteRecipe :one
 DELETE FROM recipes
 WHERE id = $1
-RETURNING id, author_id, visibility, data
+RETURNING id, author_id, visibility, data, created_at, updated_at
 `
 
 func (q *Queries) DeleteRecipe(ctx context.Context, id pgtype.UUID) (Recipe, error) {
@@ -51,12 +53,14 @@ func (q *Queries) DeleteRecipe(ctx context.Context, id pgtype.UUID) (Recipe, err
 		&i.AuthorID,
 		&i.Visibility,
 		&i.Data,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const fetchRecipe = `-- name: FetchRecipe :one
-SELECT id, author_id, visibility, data FROM recipes 
+SELECT id, author_id, visibility, data, created_at, updated_at FROM recipes 
 WHERE id = $1
 LIMIT 1
 `
@@ -69,17 +73,25 @@ func (q *Queries) FetchRecipe(ctx context.Context, id pgtype.UUID) (Recipe, erro
 		&i.AuthorID,
 		&i.Visibility,
 		&i.Data,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const listRecipes = `-- name: ListRecipes :many
-SELECT id, author_id, visibility, data FROM recipes
+SELECT id, author_id, visibility, data, created_at, updated_at FROM recipes
 LIMIT $1
+OFFSET $2
 `
 
-func (q *Queries) ListRecipes(ctx context.Context, limit int32) ([]Recipe, error) {
-	rows, err := q.db.Query(ctx, listRecipes, limit)
+type ListRecipesParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListRecipes(ctx context.Context, arg ListRecipesParams) ([]Recipe, error) {
+	rows, err := q.db.Query(ctx, listRecipes, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -92,6 +104,8 @@ func (q *Queries) ListRecipes(ctx context.Context, limit int32) ([]Recipe, error
 			&i.AuthorID,
 			&i.Visibility,
 			&i.Data,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -104,18 +118,20 @@ func (q *Queries) ListRecipes(ctx context.Context, limit int32) ([]Recipe, error
 }
 
 const listRecipesByAuthor = `-- name: ListRecipesByAuthor :many
-SELECT id, author_id, visibility, data FROM recipes
+SELECT id, author_id, visibility, data, created_at, updated_at FROM recipes
 WHERE author_id = $1
 LIMIT $2
+OFFSET $3
 `
 
 type ListRecipesByAuthorParams struct {
 	AuthorID pgtype.UUID `json:"author_id"`
 	Limit    int32       `json:"limit"`
+	Offset   int32       `json:"offset"`
 }
 
 func (q *Queries) ListRecipesByAuthor(ctx context.Context, arg ListRecipesByAuthorParams) ([]Recipe, error) {
-	rows, err := q.db.Query(ctx, listRecipesByAuthor, arg.AuthorID, arg.Limit)
+	rows, err := q.db.Query(ctx, listRecipesByAuthor, arg.AuthorID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -128,6 +144,8 @@ func (q *Queries) ListRecipesByAuthor(ctx context.Context, arg ListRecipesByAuth
 			&i.AuthorID,
 			&i.Visibility,
 			&i.Data,
+			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -141,9 +159,12 @@ func (q *Queries) ListRecipesByAuthor(ctx context.Context, arg ListRecipesByAuth
 
 const updateRecipe = `-- name: UpdateRecipe :one
 UPDATE recipes
-SET author_id = $1, visibility = $2, data = $3
+SET 
+    author_id = COALESCE($1, author_id),
+    visibility = COALESCE($2, visibility),
+    data = COALESCE($3, data)
 WHERE id = $4
-RETURNING id, author_id, visibility, data
+RETURNING id, author_id, visibility, data, created_at, updated_at
 `
 
 type UpdateRecipeParams struct {
@@ -166,6 +187,8 @@ func (q *Queries) UpdateRecipe(ctx context.Context, arg UpdateRecipeParams) (Rec
 		&i.AuthorID,
 		&i.Visibility,
 		&i.Data,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

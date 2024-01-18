@@ -3,20 +3,20 @@ package db
 import (
 	"context"
 	"testing"
+	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateUser(t *testing.T) {
+func CreateRandomUser(t *testing.T) User {
 	arg := CreateUserParams{
 		Username:     util.RandomUserName(),
 		Email:        util.RandomEmail(),
 		FirstName:    util.RandomName(),
-		PasswordHash: "testpassword",
-		Role:         "test",
+		PasswordHash: util.RandomName(),
+		Role:         util.RandomName(),
 		HouseholdID:  pgtype.UUID{Bytes: [16]byte{}},
 	}
 
@@ -32,69 +32,141 @@ func TestCreateUser(t *testing.T) {
 	require.NotZero(t, user.CreatedAt)
 	require.NotZero(t, user.UpdatedAt)
 	require.NotZero(t, user.UserID)
+
+	return user
+}
+func TestCreateUser(t *testing.T) {
+	CreateRandomUser(t)
 }
 
 func TestFetchUserByUserName(t *testing.T) {
-	Username := "testusername"
+	user1 := CreateRandomUser(t)
 
-	user, err := testQueries.FetchUserByUserName(context.Background(), Username)
+	user2, err := testQueries.FetchUserByUserName(context.Background(), user1.Username)
 	require.NoError(t, err)
-	require.NotEmpty(t, user)
-	require.NotEmpty(t, user.Email)
-	require.NotEmpty(t, user.PasswordHash)
-	require.NotEmpty(t, user.Role)
-	require.Equal(t, Username, user.Username)
-	require.NotZero(t, user.CreatedAt)
-	require.NotZero(t, user.UpdatedAt)
-	require.NotZero(t, user.UserID)
+	require.NotEmpty(t, user2)
+	require.NotEmpty(t, user2.Email)
+	require.NotEmpty(t, user2.PasswordHash)
+	require.NotEmpty(t, user2.Role)
+	require.Equal(t, user1.Username, user2.Username)
+	require.NotZero(t, user2.CreatedAt)
+	require.NotZero(t, user2.UpdatedAt)
+	require.NotZero(t, user2.UserID)
 }
 
 func TestFetchUserByUserId(t *testing.T) {
-	parsedUUID, err := uuid.Parse("10d36113-c6a9-4708-b84e-a0d076703359")
-	if err != nil {
-		t.Fatalf("Failed to parse UUID: %v", err)
-	}
+	user1 := CreateRandomUser(t)
 
-	UserID := pgtype.UUID{Bytes: parsedUUID, Valid: true}
-	user, err := testQueries.FetchUserByUserId(context.Background(), UserID)
+	user2, err := testQueries.FetchUserByUserId(context.Background(), user1.UserID)
 	require.NoError(t, err)
-	require.NotEmpty(t, user)
-	require.NotEmpty(t, user.Email)
-	require.NotEmpty(t, user.PasswordHash)
-	require.NotEmpty(t, user.Role)
-	require.NotEmpty(t, user.Username)
-	require.NotZero(t, user.CreatedAt)
-	require.NotZero(t, user.UpdatedAt)
-	require.Equal(t, UserID, user.UserID)
+	require.NotEmpty(t, user2)
+	require.NotEmpty(t, user2.Email)
+	require.NotEmpty(t, user2.PasswordHash)
+	require.NotEmpty(t, user2.Role)
+	require.NotEmpty(t, user2.Username)
+	require.NotZero(t, user2.CreatedAt)
+	require.NotZero(t, user2.UpdatedAt)
+	require.Equal(t, user1.UserID, user2.UserID)
 }
 
 func TestFetchUserByEmail(t *testing.T) {
-	Email := "testuser@test.com"
+	user1 := CreateRandomUser(t)
 
-	user, err := testQueries.FetchUserByEmail(context.Background(), Email)
+	user2, err := testQueries.FetchUserByEmail(context.Background(), user1.Email)
 	require.NoError(t, err)
-	require.NotEmpty(t, user)
-	require.NotEmpty(t, user.Username)
-	require.NotEmpty(t, user.PasswordHash)
-	require.NotEmpty(t, user.Role)
-	require.Equal(t, Email, user.Email)
-	require.NotZero(t, user.CreatedAt)
-	require.NotZero(t, user.UpdatedAt)
-	require.NotZero(t, user.UserID)
+	require.NotEmpty(t, user2)
+	require.NotEmpty(t, user2.Username)
+	require.NotEmpty(t, user2.PasswordHash)
+	require.NotEmpty(t, user2.Role)
+	require.Equal(t, user1.Email, user2.Email)
+	require.NotZero(t, user2.CreatedAt)
+	require.NotZero(t, user2.UpdatedAt)
+	require.NotZero(t, user2.UserID)
 }
 
 func TestListHouseholdMembers(t *testing.T) {
+	household := CreateRandomHousehold(t)
+
+	for i := 0; i < 5; i++ {
+		user := CreateRandomUser(t)
+		arg := UpdateUserParams{
+			Username:     user.Username,
+			Email:        user.Email,
+			FirstName:    user.FirstName,
+			PasswordHash: user.PasswordHash,
+			Role:         user.Role,
+			HouseholdID:  household.HouseholdID,
+			UserID:       user.UserID}
+		testQueries.UpdateUser(context.Background(), arg)
+	}
+	args := ListHouseholdMembersParams{
+		HouseholdID: household.HouseholdID,
+		Limit:       5,
+		Offset:      0,
+	}
+
+	users, err := testQueries.ListHouseholdMembers(context.Background(), args)
+	require.NoError(t, err)
+	require.Len(t, users, 5)
+	require.NotEmpty(t, users)
 
 }
 
 func TestListUsers(t *testing.T) {
+	for i := 0; i < 10; i++ {
+		CreateRandomUser(t)
+	}
+
+	arg := ListUsersParams{
+		Limit:  5,
+		Offset: 5,
+	}
+
+	users, err := testQueries.ListUsers(context.Background(), arg)
+	require.NoError(t, err)
+	require.Len(t, users, 5)
+
+	for _, user := range users {
+		require.NotEmpty(t, user)
+	}
 
 }
 
 func TestUpdateUser(t *testing.T) {
+	user1 := CreateRandomUser(t)
+	household := CreateRandomHousehold(t)
+
+	arg := UpdateUserParams{
+		Username:     util.RandomName(),
+		Email:        util.RandomEmail(),
+		FirstName:    util.RandomName(),
+		PasswordHash: util.RandomName(),
+		Role:         util.RandomName(),
+		HouseholdID:  household.HouseholdID,
+		UserID:       user1.UserID}
+
+	user2, err := testQueries.UpdateUser(context.Background(), arg)
+
+	require.NoError(t, err)
+	require.NotEmpty(t, user2)
+	require.NotEqual(t, user2.Username, user1.Username)
+	require.NotEqual(t, user2.Email, user1.Email)
+	require.NotEqual(t, user2.FirstName, user1.FirstName)
+	require.NotEqual(t, user2.PasswordHash, user1.PasswordHash)
+	require.NotEqual(t, user2.HouseholdID, user1.HouseholdID)
+	require.NotEqual(t, user2.Role, user1.Role)
+	require.NotZero(t, user2.CreatedAt)
+	require.WithinDuration(t, user2.UpdatedAt.Time, user1.UpdatedAt.Time, time.Second)
 
 }
 
 func TestDeleteUser(t *testing.T) {
+	user1 := CreateRandomUser(t)
+	_, err := testQueries.DeleteUser(context.Background(), user1.Email)
 
+	user2, err2 := testQueries.FetchUserByEmail(context.Background(), user1.Email)
+	require.NoError(t, err)
+	require.Error(t, err2)
+	require.EqualError(t, err2, "no rows in result set")
+	require.Empty(t, user2)
 }

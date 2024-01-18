@@ -114,7 +114,9 @@ func (q *Queries) ListHouseholds(ctx context.Context, arg ListHouseholdsParams) 
 
 const updateHousehold = `-- name: UpdateHousehold :one
 UPDATE households
-SET household_name = $1, address = $2
+SET 
+    household_name = COALESCE($1,household_name),
+    address = COALESCE($2,address)
 WHERE household_id = $3
 RETURNING household_id, household_name, address, created_at, updated_at
 `
