@@ -15,8 +15,8 @@ func CreateRandomUser(t *testing.T) User {
 		Username:     util.RandomUserName(),
 		Email:        util.RandomEmail(),
 		FirstName:    util.RandomName(),
-		PasswordHash: "testpassword",
-		Role:         "test",
+		PasswordHash: util.RandomName(),
+		Role:         util.RandomName(),
 		HouseholdID:  pgtype.UUID{Bytes: [16]byte{}},
 	}
 
@@ -90,13 +90,13 @@ func TestListHouseholdMembers(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		user := CreateRandomUser(t)
 		arg := UpdateUserParams{
-			nil,
-			nil,
-			nil,
-			nil,
-			nil,
-			household.HouseholdID,
-			user.UserID}
+			Username:     user.Username,
+			Email:        user.Email,
+			FirstName:    user.FirstName,
+			PasswordHash: user.PasswordHash,
+			Role:         user.Role,
+			HouseholdID:  household.HouseholdID,
+			UserID:       user.UserID}
 		testQueries.UpdateUser(context.Background(), arg)
 	}
 	args := ListHouseholdMembersParams{
@@ -137,13 +137,13 @@ func TestUpdateUser(t *testing.T) {
 	household := CreateRandomHousehold(t)
 
 	arg := UpdateUserParams{
-		util.RandomName(),     // Username
-		util.RandomEmail(),    // Email
-		util.RandomName(),     // First Name
-		util.RandomName(),     // PasswordHash
-		util.RandomName(),     // Role
-		household.HouseholdID, // HouseholdID
-		user1.UserID}          // Target
+		Username:     util.RandomName(),
+		Email:        util.RandomEmail(),
+		FirstName:    util.RandomName(),
+		PasswordHash: util.RandomName(),
+		Role:         util.RandomName(),
+		HouseholdID:  household.HouseholdID,
+		UserID:       user1.UserID}
 
 	user2, err := testQueries.UpdateUser(context.Background(), arg)
 

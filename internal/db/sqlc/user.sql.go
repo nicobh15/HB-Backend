@@ -232,11 +232,11 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 const updateUser = `-- name: UpdateUser :one
 UPDATE users 
 SET 
-    username = COALESCE(NULLIF($1, ''), username),
-    email = COALESCE(NULLIF($2, ''), email),
-    first_name = COALESCE(NULLIF($3, ''), first_name),
-    password_hash = COALESCE(NULLIF($4, ''), password_hash),
-    role = COALESCE(NULLIF($5, ''), role),
+    username = COALESCE($1, username),
+    email = COALESCE($2, email),
+    first_name = COALESCE($3, first_name),
+    password_hash = COALESCE($4, password_hash),
+    role = COALESCE($5, role),
     household_id = COALESCE($6, household_id),
     updated_at = now()
 WHERE user_id = $7
@@ -244,22 +244,22 @@ RETURNING user_id, username, email, first_name, password_hash, role, household_i
 `
 
 type UpdateUserParams struct {
-	Column1     interface{} `json:"column_1"`
-	Column2     interface{} `json:"column_2"`
-	Column3     interface{} `json:"column_3"`
-	Column4     interface{} `json:"column_4"`
-	Column5     interface{} `json:"column_5"`
-	HouseholdID pgtype.UUID `json:"household_id"`
-	UserID      pgtype.UUID `json:"user_id"`
+	Username     string      `json:"username"`
+	Email        string      `json:"email"`
+	FirstName    string      `json:"first_name"`
+	PasswordHash string      `json:"password_hash"`
+	Role         string      `json:"role"`
+	HouseholdID  pgtype.UUID `json:"household_id"`
+	UserID       pgtype.UUID `json:"user_id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, updateUser,
-		arg.Column1,
-		arg.Column2,
-		arg.Column3,
-		arg.Column4,
-		arg.Column5,
+		arg.Username,
+		arg.Email,
+		arg.FirstName,
+		arg.PasswordHash,
+		arg.Role,
 		arg.HouseholdID,
 		arg.UserID,
 	)

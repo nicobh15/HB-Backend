@@ -1,9 +1,13 @@
 -- name: CreateInventoryItem :one
 INSERT INTO inventory (
-    household_id, category, name, quantity, expiration_date, purchase_date, location
-    ) VALUES ( 
-        $1, $2, $3, $4, $5, $6, $7
-    ) RETURNING *;
+    household_id, category, name, quantity, location
+) VALUES (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5
+) RETURNING *;
 
 -- name: FetchInventoryItem :one
 SELECT * FROM inventory 
@@ -18,7 +22,14 @@ OFFSET $3;
 
 -- name: UpdateInventoryItem :one
 UPDATE inventory
-SET household_id = $1, category = $2, name = $3, quantity = $4, expiration_date = $5, purchase_date = $6, location = $7
+SET 
+    household_id = COALESCE($1, household_id), 
+    category = COALESCE($2, category), 
+    name = COALESCE($3, name), 
+    quantity = COALESCE($4, quantity), 
+    expiration_date = COALESCE($5, expiration_date), 
+    purchase_date = COALESCE($6, purchase_date), 
+    location = COALESCE($7, location)
 WHERE item_id = $8
 RETURNING *;
 
