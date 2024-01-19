@@ -63,8 +63,8 @@ func (server *Server) fetchUserByEmail(ctx *gin.Context) {
 }
 
 type ListUsersRequest struct {
-	PageId   int32 `form:"page_id" binding:"required"`
-	PageSize int32 `form:"page_size" binding:"required"`
+	PageId   int32 `form:"page_id" binding:"required,min=1"`
+	PageSize int32 `form:"page_size" binding:"required,min=5,max=20"`
 }
 
 func (server *Server) listUsers(ctx *gin.Context) {
@@ -86,8 +86,8 @@ func (server *Server) listUsers(ctx *gin.Context) {
 
 type ListUsersByHouseholdRequest struct {
 	HouseholdID pgtype.UUID `form:"household_id" binding:"required"`
-	PageId      int32       `form:"page_id" binding:"required, min=1"`
-	PageSize    int32       `form:"page_size" binding:"required, min=5, max=20"`
+	PageId      int32       `form:"page_id" binding:"required,min=1"`
+	PageSize    int32       `form:"page_size" binding:"required,min=5,max=20"`
 }
 
 func (server *Server) listUsersByHousehold(ctx *gin.Context) {

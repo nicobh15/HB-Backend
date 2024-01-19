@@ -7,16 +7,22 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/nicobh15/HomeBuddy-Backend/internal/api"
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
+	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
 )
 
-const (
-	dbSource      = "postgresql://root:secret@localhost:5432/homebuddy?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
-)
+// const (
+// 	dbSource      = "postgresql://root:secret@localhost:5432/homebuddy?sslmode=disable"
+// 	serverAddress = "0.0.0.0:8080"
+// )
 
 func main() {
+	config, err := util.LoadConfig(".")
 
-	pool, err := pgxpool.New(context.Background(), dbSource)
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	pool, err := pgxpool.New(context.Background(), config.DBSource)
 
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
@@ -25,7 +31,7 @@ func main() {
 	store := db.NewStore(pool)
 	server := api.NewServer(store)
 
-	err = server.Start(serverAddress)
+	err = server.Start(config.ServerAddress)
 
 	if err != nil {
 		log.Fatal("cannot start server:", err)
