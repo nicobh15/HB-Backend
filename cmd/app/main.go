@@ -1,8 +1,39 @@
 package main
 
-func main() {
+import (
+	"context"
+	"log"
 
-	// Listen and Server in 0.0.0.0:8080
-	// r.Run(":8080")
-	return
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/nicobh15/HomeBuddy-Backend/internal/api"
+	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
+	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
+)
+
+// const (
+// 	dbSource      = "postgresql://root:secret@localhost:5432/homebuddy?sslmode=disable"
+// 	serverAddress = "0.0.0.0:8080"
+// )
+
+func main() {
+	config, err := util.LoadConfig(".")
+
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	pool, err := pgxpool.New(context.Background(), config.DBSource)
+
+	if err != nil {
+		log.Fatal("cannot connect to db:", err)
+	}
+
+	store := db.NewStore(pool)
+	server := api.NewServer(store)
+
+	err = server.Start(config.ServerAddress)
+
+	if err != nil {
+		log.Fatal("cannot start server:", err)
+	}
 }
