@@ -106,5 +106,54 @@ func (server *Server) listUsersByHousehold(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, users)
+}
 
+type DeleteUserRequest struct {
+	Email string `uri:"email" binding:"required"`
+}
+
+func (server *Server) deleteUser(ctx *gin.Context) {
+	var req DeleteUserRequest
+	if err := ctx.ShouldBindUri(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	user, err := server.store.DeleteUser(ctx, req.Email)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, user)
+}
+
+type UpdateUserRequest struct {
+	Username     string      `json:"username"`
+	Email        string      `json:"email"`
+	FirstName    string      `json:"first_name"`
+	PasswordHash string      `json:"password_hash"`
+	Role         string      `json:"role"`
+	HouseholdID  pgtype.UUID `json:"household_id"`
+	UserID       pgtype.UUID `json:"user_id" binding:"required"`
+}
+
+func (server *Server) updateUser(ctx *gin.Context) {
+	var req UpdateUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	user, err := server.store.UpdateUser(ctx, db.UpdateUserParams{
+		Username:     req.Username,
+		Email:        req.Email,
+		FirstName:    req.FirstName,
+		PasswordHash: req.PasswordHash,
+		Role:         req.Role,
+		HouseholdID:  req.HouseholdID,
+		UserID:       req.UserID,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+	ctx.JSON(http.StatusOK, user)
 }

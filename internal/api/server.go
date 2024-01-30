@@ -18,6 +18,8 @@ func NewServer(store *db.SQLStore) *Server {
 	router.GET("/users/:username", server.fetchUserByEmail)
 	router.GET("/users", server.listUsers)
 	router.GET("/users/household", server.listUsersByHousehold)
+	router.DELETE("/users/:email", server.deleteUser)
+	router.PUT("/users/userID", server.updateUser)
 
 	server.router = router
 	return server
