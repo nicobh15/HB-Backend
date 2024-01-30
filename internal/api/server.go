@@ -33,6 +33,14 @@ func NewServer(store *db.SQLStore) *Server {
 		householdRoutes.PUT("/", server.updateHousehold)
 	}
 
+	inventoryRoutes := router.Group("/inventory")
+	{
+		inventoryRoutes.POST("/", server.createInventoryItem)
+		inventoryRoutes.GET("/", server.fetchHouseholdInventory)
+		inventoryRoutes.DELETE("/", server.deleteInventoryItem)
+		inventoryRoutes.PUT("/", server.updateInventoryItem)
+	}
+
 	server.router = router
 	return server
 }
