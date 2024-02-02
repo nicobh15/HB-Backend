@@ -5,6 +5,11 @@ import (
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
 )
 
+// TODO - Add tests for all the API methods
+// TODO - Add validation for all the API methods
+// TODO - Add authentication middleware
+// TODO - Add logging middleware
+
 type Server struct {
 	store  *db.SQLStore
 	router *gin.Engine
