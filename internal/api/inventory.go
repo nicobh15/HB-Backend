@@ -9,7 +9,7 @@ import (
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
 )
 
-type CreateInventoryItemRequest struct {
+type createInventoryItemRequest struct {
 	HouseholdID pgtype.UUID `json:"household_id" binding:"required"`
 	ItemName    string      `json:"item_name" binding:"required"`
 	Quantity    int32       `json:"quantity" binding:"required"`
@@ -18,7 +18,7 @@ type CreateInventoryItemRequest struct {
 }
 
 func (server *Server) createInventoryItem(ctx *gin.Context) {
-	var req CreateInventoryItemRequest
+	var req createInventoryItemRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -37,14 +37,14 @@ func (server *Server) createInventoryItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, inventoryItem)
 }
 
-type GetHouseholdInventory struct {
+type getHouseholdInventoryRequest struct {
 	HouseholdID pgtype.UUID `form:"household_id" binding:"required"`
 	Limit       int32       `form:"limit,default=10" binding:"max=100"`
 	Offset      int32       `form:"offset,default=0" binding:"max=100"`
 }
 
 func (server *Server) fetchHouseholdInventory(ctx *gin.Context) {
-	var req GetHouseholdInventory
+	var req getHouseholdInventoryRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -66,12 +66,12 @@ func (server *Server) fetchHouseholdInventory(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, inventory)
 }
 
-type DeleteInventoryItemRequest struct {
+type deleteInventoryItemRequest struct {
 	ItemID pgtype.UUID `form:"item_id" binding:"required"`
 }
 
 func (server *Server) deleteInventoryItem(ctx *gin.Context) {
-	var req DeleteInventoryItemRequest
+	var req deleteInventoryItemRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -89,19 +89,19 @@ func (server *Server) deleteInventoryItem(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, inventoryItem)
 }
 
-type UpdateInventoryItemRequest struct {
+type updateInventoryItemRequest struct {
 	ItemID       pgtype.UUID `json:"item_id" binding:"required"`
-	HouseholdID  pgtype.UUID `json:"household_id"`
-	ItemName     string      `json:"item_name"`
-	Quantity     int32       `json:"quantity"`
-	Category     string      `json:"category"`
-	Location     pgtype.Text `json:"location"`
-	Expiration   pgtype.Date `json:"expiration_date"`
-	PurchaseDate pgtype.Date `json:"purchase_date"`
+	HouseholdID  pgtype.UUID `json:"household_id" binding:"required"`
+	ItemName     string      `json:"item_name" binding:"required"`
+	Quantity     int32       `json:"quantity" binding:"required"`
+	Category     string      `json:"category" binding:"required"`
+	Location     pgtype.Text `json:"location" binding:"required"`
+	Expiration   pgtype.Date `json:"expiration_date" binding:"required"`
+	PurchaseDate pgtype.Date `json:"purchase_date" binding:"required"`
 }
 
 func (server *Server) updateInventoryItem(ctx *gin.Context) {
-	var req UpdateInventoryItemRequest
+	var req updateInventoryItemRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return

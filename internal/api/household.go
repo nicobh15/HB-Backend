@@ -9,13 +9,13 @@ import (
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
 )
 
-type CreateHouseholdRequest struct {
+type createHouseholdRequest struct {
 	HouseholdName string      `json:"household_name" binding:"required"`
 	Address       pgtype.Text `json:"address" `
 }
 
 func (server *Server) createHousehold(ctx *gin.Context) {
-	var req CreateHouseholdRequest
+	var req createHouseholdRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -31,12 +31,12 @@ func (server *Server) createHousehold(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, household)
 }
 
-type GetHouseholdRequest struct {
+type getHouseholdRequest struct {
 	HouseholdID pgtype.UUID `form:"household_id" binding:"required"`
 }
 
 func (server *Server) fetchHousehold(ctx *gin.Context) {
-	var req GetHouseholdRequest
+	var req getHouseholdRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -54,13 +54,13 @@ func (server *Server) fetchHousehold(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, household)
 }
 
-type ListHouseholdsRequest struct {
+type listHouseholdsRequest struct {
 	PageID   int32 `form:"page_id" binding:"required,min=1"`
 	PageSize int32 `form:"page_size" binding:"required,min=5,max=20"`
 }
 
 func (server *Server) listHouseholds(ctx *gin.Context) {
-	var req ListHouseholdsRequest
+	var req listHouseholdsRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -76,12 +76,12 @@ func (server *Server) listHouseholds(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, households)
 }
 
-type DeleteHouseholdRequest struct {
+type deleteHouseholdRequest struct {
 	HouseholdID pgtype.UUID `form:"household_id" binding:"required"`
 }
 
 func (server *Server) deleteHousehold(ctx *gin.Context) {
-	var req DeleteHouseholdRequest
+	var req deleteHouseholdRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -99,14 +99,14 @@ func (server *Server) deleteHousehold(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, household)
 }
 
-type UpdateHouseholdRequest struct {
+type updateHouseholdRequest struct {
 	HouseholdID   pgtype.UUID `json:"household_id" binding:"required"`
-	HouseholdName string      `json:"household_name"`
-	Address       pgtype.Text `json:"address" `
+	HouseholdName string      `json:"household_name" binding:"required"`
+	Address       pgtype.Text `json:"address" binding:"required"`
 }
 
 func (server *Server) updateHousehold(ctx *gin.Context) {
-	var req UpdateHouseholdRequest
+	var req updateHouseholdRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
