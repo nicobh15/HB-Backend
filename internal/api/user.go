@@ -29,6 +29,18 @@ type createUserResponse struct {
 	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
 }
 
+func userResponse(user db.User) createUserResponse {
+	return createUserResponse{
+		Username:    user.Username,
+		Email:       user.Email,
+		FirstName:   user.FirstName,
+		Role:        user.Role,
+		HouseholdID: user.HouseholdID,
+		CreatedAt:   user.CreatedAt,
+		UpdatedAt:   user.UpdatedAt,
+	}
+}
+
 func (server *Server) createUser(ctx *gin.Context) {
 	var req createUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -51,15 +63,7 @@ func (server *Server) createUser(ctx *gin.Context) {
 		HouseholdID:  req.HouseholdID,
 	})
 
-	rsp := createUserResponse{
-		Username:    user.Username,
-		Email:       user.Email,
-		FirstName:   user.FirstName,
-		Role:        user.Role,
-		HouseholdID: user.HouseholdID,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-	}
+	rsp := userResponse(user)
 
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
@@ -164,15 +168,6 @@ type updateUserRequest struct {
 	HouseholdID pgtype.UUID `json:"household_id" binding:"required"`
 	UserID      pgtype.UUID `json:"user_id" binding:"required"`
 }
-type updateUserResponse struct {
-	Username    string             `json:"username"`
-	Email       string             `json:"email"`
-	FirstName   string             `json:"first_name"`
-	Role        string             `json:"role"`
-	HouseholdID pgtype.UUID        `json:"household_id"`
-	CreatedAt   pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt   pgtype.Timestamptz `json:"updated_at"`
-}
 
 func (server *Server) updateUser(ctx *gin.Context) {
 	var req updateUserRequest
@@ -195,18 +190,51 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		HouseholdID:  req.HouseholdID,
 		UserID:       req.UserID,
 	})
-	rsp := updateUserResponse{
-		Username:    user.Username,
-		Email:       user.Email,
-		FirstName:   user.FirstName,
-		Role:        user.Role,
-		HouseholdID: user.HouseholdID,
-		CreatedAt:   user.CreatedAt,
-		UpdatedAt:   user.UpdatedAt,
-	}
+	rsp := userResponse(user)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
+	}
+	ctx.JSON(http.StatusOK, rsp)
+}
+
+type loginUserRequest struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type loginUserResponse struct {
+	AccessToken string             `json:"access_token"`
+	User        createUserResponse `json:"user"`
+}
+
+func (server *Server) loginUser(ctx *gin.Context) {
+	var req loginUserRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	user, err := server.store.FetchUserByEmail(ctx, req.Email)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	err = util.CheckPassword(req.Password, user.PasswordHash)
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
+	accessToken, err := server.tokenMaker.CreateToken(user.Username, server.config.AccessTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	rsp := loginUserResponse{
+		AccessToken: accessToken,
+		User:        userResponse(user),
 	}
 	ctx.JSON(http.StatusOK, rsp)
 }
