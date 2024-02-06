@@ -4,25 +4,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
 	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
 	"github.com/stretchr/testify/require"
 )
 
-func CreateUser() db.User {
-	hashedPassword, _ := util.HashPassword(util.RandomString(10))
+func CreateUser() TokenableUser {
 
-	user := db.User{
-		Username:     util.RandomUserName(),
-		Email:        util.RandomEmail(),
-		FirstName:    util.RandomName(),
-		PasswordHash: hashedPassword,
-		Role:         util.RandomName(),
-		HouseholdID:  util.RandomUUID(),
-		CreatedAt:    pgtype.Timestamptz{Time: time.Now()},
-		UpdatedAt:    pgtype.Timestamptz{Time: time.Now()},
-		UserID:       util.RandomUUID(),
+	user := TokenableUser{
+		Username:    util.RandomUserName(),
+		Email:       util.RandomEmail(),
+		FirstName:   util.RandomName(),
+		Role:        util.RandomName(),
+		HouseholdID: util.RandomUUID(),
 	}
 
 	return user

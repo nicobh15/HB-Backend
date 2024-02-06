@@ -1,12 +1,14 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
+	token "github.com/nicobh15/HomeBuddy-Backend/internal/token"
 	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
 )
 
@@ -90,6 +92,14 @@ func (server *Server) fetchUserByEmail(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if authPayload.User.Username != req.Username {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
@@ -226,7 +236,7 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, err := server.tokenMaker.CreateToken(user, server.config.AccessTokenDuration)
+	accessToken, err := server.tokenMaker.CreateToken(token.CastTokenableUser(user), server.config.AccessTokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

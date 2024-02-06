@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
 )
 
@@ -13,14 +14,30 @@ var (
 	ErrInvalidToken = errors.New("token is invalid")
 )
 
+type TokenableUser struct {
+	Username    string      `json:"username"`
+	Email       string      `json:"email"`
+	FirstName   string      `json:"first_name"`
+	Role        string      `json:"role"`
+	HouseholdID pgtype.UUID `json:"household_id"`
+}
 type Payload struct {
-	ID        uuid.UUID `json:"id"`
-	User      db.User   `json:"user"`
-	IssuedAt  time.Time `json:"issued_at"`
-	ExpiredAt time.Time `json:"expired_at"`
+	ID        uuid.UUID     `json:"id"`
+	User      TokenableUser `json:"user"`
+	IssuedAt  time.Time     `json:"issued_at"`
+	ExpiredAt time.Time     `json:"expired_at"`
 }
 
-func NewPayload(user db.User, duration time.Duration) (*Payload, error) {
+func CastTokenableUser(user db.User) TokenableUser {
+	return TokenableUser{
+		Username:    user.Username,
+		Email:       user.Email,
+		FirstName:   user.FirstName,
+		Role:        user.Role,
+		HouseholdID: user.HouseholdID,
+	}
+}
+func NewPayload(user TokenableUser, duration time.Duration) (*Payload, error) {
 	tokenID, err := uuid.NewRandom()
 
 	if err != nil {
