@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
 	"github.com/o1egl/paseto"
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -26,8 +27,8 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	return maker, nil
 }
 
-func (maker *PasetoMaker) CreateToken(username string, duration time.Duration) (string, error) {
-	payload, err := NewPayload(username, duration)
+func (maker *PasetoMaker) CreateToken(user db.User, duration time.Duration) (string, error) {
+	payload, err := NewPayload(user, duration)
 	if err != nil {
 		return "", err
 	}
