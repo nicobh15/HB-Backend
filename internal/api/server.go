@@ -49,7 +49,7 @@ func (server *Server) setupRouters() {
 	{
 		userRoutes := authRoutes.Group("/users")
 		{
-			userRoutes.GET("/:username", server.fetchUserByEmail)
+			userRoutes.GET("/:username", server.fetchUserByUserName)
 			userRoutes.GET("/", server.listUsers)
 			userRoutes.GET("/household", server.listUsersByHousehold)
 			userRoutes.DELETE("/:email", server.deleteUser)

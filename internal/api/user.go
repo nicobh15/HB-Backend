@@ -78,10 +78,17 @@ type getUserRequest struct {
 	Username string `uri:"username" binding:"required"`
 }
 
-func (server *Server) fetchUserByEmail(ctx *gin.Context) {
+func (server *Server) fetchUserByUserName(ctx *gin.Context) {
 	var req getUserRequest
 	if err := ctx.ShouldBindUri(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.Username != req.Username {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 	user, err := server.store.FetchUserByUserName(ctx, req.Username)
@@ -95,13 +102,6 @@ func (server *Server) fetchUserByEmail(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
-	if authPayload.User.Username != req.Username {
-		err := fmt.Errorf("unauthorized Access")
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
-		return
-	}
 	ctx.JSON(http.StatusOK, user)
 }
 
@@ -116,6 +116,14 @@ func (server *Server) listUsers(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if authPayload.User.Role != "admin" {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	users, err := server.store.ListUsers(ctx, db.ListUsersParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageId - 1) * req.PageSize,
@@ -124,6 +132,7 @@ func (server *Server) listUsers(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
 	ctx.JSON(http.StatusOK, users)
 }
 
@@ -139,6 +148,14 @@ func (server *Server) listUsersByHousehold(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	users, err := server.store.ListHouseholdMembers(ctx, db.ListHouseholdMembersParams{
 		HouseholdID: req.HouseholdID,
 		Limit:       req.PageSize,
@@ -148,6 +165,7 @@ func (server *Server) listUsersByHousehold(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
 	ctx.JSON(http.StatusOK, users)
 }
 
@@ -161,11 +179,20 @@ func (server *Server) deleteUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if authPayload.User.Email != req.Email {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	user, err := server.store.DeleteUser(ctx, req.Email)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
 	ctx.JSON(http.StatusOK, user)
 }
 
@@ -191,6 +218,14 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
+	if authPayload.User.Username != req.Username {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	user, err := server.store.UpdateUser(ctx, db.UpdateUserParams{
 		Username:     req.Username,
 		Email:        req.Email,
@@ -205,6 +240,7 @@ func (server *Server) updateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
+
 	ctx.JSON(http.StatusOK, rsp)
 }
 

@@ -1,12 +1,14 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
+	"github.com/nicobh15/HomeBuddy-Backend/internal/token"
 )
 
 type createInventoryItemRequest struct {
@@ -21,6 +23,12 @@ func (server *Server) createInventoryItem(ctx *gin.Context) {
 	var req createInventoryItemRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 	inventoryItem, err := server.store.CreateInventoryItem(ctx, db.CreateInventoryItemParams{
@@ -49,6 +57,12 @@ func (server *Server) fetchHouseholdInventory(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
 	inventory, err := server.store.ListInventoryItems(ctx, db.ListInventoryItemsParams{
 		HouseholdID: req.HouseholdID,
 		Limit:       req.Limit,
@@ -67,7 +81,8 @@ func (server *Server) fetchHouseholdInventory(ctx *gin.Context) {
 }
 
 type deleteInventoryItemRequest struct {
-	ItemID pgtype.UUID `form:"item_id" binding:"required"`
+	ItemID      pgtype.UUID `form:"item_id" binding:"required"`
+	HouseholdID pgtype.UUID `form:"household_id" binding:"required"`
 }
 
 func (server *Server) deleteInventoryItem(ctx *gin.Context) {
@@ -76,6 +91,14 @@ func (server *Server) deleteInventoryItem(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	inventoryItem, err := server.store.DeleteInventoryItem(ctx, req.ItemID)
 
 	if err != nil {
@@ -106,6 +129,14 @@ func (server *Server) updateInventoryItem(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	inventoryItem, err := server.store.UpdateInventoryItem(ctx, db.UpdateInventoryItemParams{
 		ItemID:         req.ItemID,
 		HouseholdID:    req.HouseholdID,

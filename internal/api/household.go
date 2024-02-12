@@ -1,12 +1,14 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
+	"github.com/nicobh15/HomeBuddy-Backend/internal/token"
 )
 
 type createHouseholdRequest struct {
@@ -41,6 +43,13 @@ func (server *Server) fetchHousehold(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	household, err := server.store.FetchHousehold(ctx, req.HouseholdID)
 
 	if err != nil {
@@ -65,6 +74,12 @@ func (server *Server) listHouseholds(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.Role != "admin" {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
 	households, err := server.store.ListHouseholds(ctx, db.ListHouseholdsParams{
 		Limit:  req.PageSize,
 		Offset: (req.PageID - 1) * req.PageSize,
@@ -84,6 +99,12 @@ func (server *Server) deleteHousehold(ctx *gin.Context) {
 	var req deleteHouseholdRequest
 	if err := ctx.ShouldBindQuery(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
 		return
 	}
 	household, err := server.store.DeleteHousehold(ctx, req.HouseholdID)
@@ -111,6 +132,14 @@ func (server *Server) updateHousehold(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload.User.HouseholdID != req.HouseholdID {
+		err := fmt.Errorf("unauthorized Access")
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err))
+		return
+	}
+
 	household, err := server.store.UpdateHousehold(ctx, db.UpdateHouseholdParams{
 		HouseholdName: req.HouseholdName,
 		Address:       req.Address,
