@@ -72,6 +72,14 @@ func (server *Server) setupRouters() {
 			inventoryRoutes.DELETE("/", server.deleteInventoryItem)
 			inventoryRoutes.PUT("/", server.updateInventoryItem)
 		}
+
+		recipeRoutes := authRoutes.Group("/recipes")
+		{
+			recipeRoutes.POST("/", server.createRecipe)
+			recipeRoutes.GET("/", server.fetchRecipe)
+			recipeRoutes.DELETE("/", server.deleteRecipe)
+			recipeRoutes.PUT("/", server.updateRecipe)
+		}
 	}
 
 	server.router = router

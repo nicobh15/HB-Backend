@@ -13,7 +13,7 @@ func CreateRandomRecipe(t *testing.T) Recipe {
 	author := CreateRandomUser(t)
 
 	args := CreateRecipeParams{
-		AuthorID:   author.UserID,
+		Author:     author.Username,
 		Visibility: util.RandomInt32(0, 3),
 		Data:       util.RandomRecipeData(),
 	}
@@ -21,7 +21,7 @@ func CreateRandomRecipe(t *testing.T) Recipe {
 	recipe, err := testQueries.CreateRecipe(context.Background(), args)
 	require.NoError(t, err)
 	require.NotEmpty(t, recipe)
-	require.Equal(t, args.AuthorID, recipe.AuthorID)
+	require.Equal(t, args.Author, recipe.Author)
 	require.Equal(t, args.Visibility, recipe.Visibility)
 	require.NotZero(t, recipe.CreatedAt)
 	require.NotZero(t, recipe.UpdatedAt)
@@ -42,14 +42,14 @@ func CreateRandomRecipes(t *testing.T, num int) []Recipe {
 	var recipes []Recipe
 	for i := 0; i < num; i++ {
 		args := CreateRecipeParams{
-			AuthorID:   author.UserID,
+			Author:     author.Username,
 			Visibility: util.RandomInt32(0, 3),
 			Data:       util.RandomRecipeData(),
 		}
 		recipe, err := testQueries.CreateRecipe(context.Background(), args)
 		require.NoError(t, err)
 		require.NotEmpty(t, recipe)
-		require.Equal(t, args.AuthorID, recipe.AuthorID)
+		require.Equal(t, args.Author, recipe.Author)
 		require.Equal(t, args.Visibility, recipe.Visibility)
 		require.NotZero(t, recipe.CreatedAt)
 		require.NotZero(t, recipe.UpdatedAt)
@@ -88,7 +88,7 @@ func TestFetchRecipe(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, recipe2)
 	require.Equal(t, recipe1.ID, recipe2.ID)
-	require.Equal(t, recipe1.AuthorID, recipe2.AuthorID)
+	require.Equal(t, recipe1.Author, recipe2.Author)
 	require.Equal(t, recipe1.Visibility, recipe2.Visibility)
 	require.Equal(t, recipe1.Data, recipe2.Data)
 	require.NotZero(t, recipe2.CreatedAt)
@@ -98,12 +98,12 @@ func TestFetchRecipe(t *testing.T) {
 func TestListRecipesByAuthor(t *testing.T) {
 	recipes := CreateRandomRecipes(t, 10)
 
-	author := recipes[0].AuthorID
+	author := recipes[0].Author
 
 	arg := ListRecipesByAuthorParams{
-		AuthorID: author,
-		Limit:    5,
-		Offset:   5,
+		Author: author,
+		Limit:  5,
+		Offset: 5,
 	}
 
 	recipes2, err := testQueries.ListRecipesByAuthor(context.Background(), arg)
@@ -112,7 +112,7 @@ func TestListRecipesByAuthor(t *testing.T) {
 
 	for _, recipe := range recipes2 {
 		require.NotEmpty(t, recipe)
-		require.Equal(t, author, recipe.AuthorID)
+		require.Equal(t, author, recipe.Author)
 	}
 }
 
@@ -137,6 +137,7 @@ func TestUpdateRecipe(t *testing.T) {
 	recipe1 := CreateRandomRecipe(t)
 
 	args := UpdateRecipeParams{
+		Author:     recipe1.Author,
 		Visibility: util.RandomInt32(0, 3),
 		Data:       util.RandomRecipeData(),
 		ID:         recipe1.ID,
@@ -146,7 +147,6 @@ func TestUpdateRecipe(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotEmpty(t, recipe2)
-	// require.NotEqual(t, recipe2.Visibility, recipe1.Visibility)
 	require.NotEqual(t, recipe2.Data, recipe1.Data)
 	require.NotZero(t, recipe2.CreatedAt)
 	require.NotZero(t, recipe2.UpdatedAt)

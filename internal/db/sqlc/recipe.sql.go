@@ -13,24 +13,24 @@ import (
 
 const createRecipe = `-- name: CreateRecipe :one
 INSERT INTO recipes (
-    author_id, visibility, data
+    author, visibility, data
     ) VALUES ( 
         $1, $2, $3
-    ) RETURNING id, author_id, visibility, data, created_at, updated_at
+    ) RETURNING id, author, visibility, data, created_at, updated_at
 `
 
 type CreateRecipeParams struct {
-	AuthorID   pgtype.UUID `json:"author_id"`
-	Visibility int32       `json:"visibility"`
-	Data       []byte      `json:"data"`
+	Author     string `json:"author"`
+	Visibility int32  `json:"visibility"`
+	Data       []byte `json:"data"`
 }
 
 func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Recipe, error) {
-	row := q.db.QueryRow(ctx, createRecipe, arg.AuthorID, arg.Visibility, arg.Data)
+	row := q.db.QueryRow(ctx, createRecipe, arg.Author, arg.Visibility, arg.Data)
 	var i Recipe
 	err := row.Scan(
 		&i.ID,
-		&i.AuthorID,
+		&i.Author,
 		&i.Visibility,
 		&i.Data,
 		&i.CreatedAt,
@@ -42,7 +42,7 @@ func (q *Queries) CreateRecipe(ctx context.Context, arg CreateRecipeParams) (Rec
 const deleteRecipe = `-- name: DeleteRecipe :one
 DELETE FROM recipes
 WHERE id = $1
-RETURNING id, author_id, visibility, data, created_at, updated_at
+RETURNING id, author, visibility, data, created_at, updated_at
 `
 
 func (q *Queries) DeleteRecipe(ctx context.Context, id pgtype.UUID) (Recipe, error) {
@@ -50,7 +50,7 @@ func (q *Queries) DeleteRecipe(ctx context.Context, id pgtype.UUID) (Recipe, err
 	var i Recipe
 	err := row.Scan(
 		&i.ID,
-		&i.AuthorID,
+		&i.Author,
 		&i.Visibility,
 		&i.Data,
 		&i.CreatedAt,
@@ -60,7 +60,7 @@ func (q *Queries) DeleteRecipe(ctx context.Context, id pgtype.UUID) (Recipe, err
 }
 
 const fetchRecipe = `-- name: FetchRecipe :one
-SELECT id, author_id, visibility, data, created_at, updated_at FROM recipes 
+SELECT id, author, visibility, data, created_at, updated_at FROM recipes 
 WHERE id = $1
 LIMIT 1
 `
@@ -70,7 +70,7 @@ func (q *Queries) FetchRecipe(ctx context.Context, id pgtype.UUID) (Recipe, erro
 	var i Recipe
 	err := row.Scan(
 		&i.ID,
-		&i.AuthorID,
+		&i.Author,
 		&i.Visibility,
 		&i.Data,
 		&i.CreatedAt,
@@ -80,7 +80,7 @@ func (q *Queries) FetchRecipe(ctx context.Context, id pgtype.UUID) (Recipe, erro
 }
 
 const listRecipes = `-- name: ListRecipes :many
-SELECT id, author_id, visibility, data, created_at, updated_at FROM recipes
+SELECT id, author, visibility, data, created_at, updated_at FROM recipes
 LIMIT $1
 OFFSET $2
 `
@@ -101,7 +101,7 @@ func (q *Queries) ListRecipes(ctx context.Context, arg ListRecipesParams) ([]Rec
 		var i Recipe
 		if err := rows.Scan(
 			&i.ID,
-			&i.AuthorID,
+			&i.Author,
 			&i.Visibility,
 			&i.Data,
 			&i.CreatedAt,
@@ -118,20 +118,20 @@ func (q *Queries) ListRecipes(ctx context.Context, arg ListRecipesParams) ([]Rec
 }
 
 const listRecipesByAuthor = `-- name: ListRecipesByAuthor :many
-SELECT id, author_id, visibility, data, created_at, updated_at FROM recipes
-WHERE author_id = $1
+SELECT id, author, visibility, data, created_at, updated_at FROM recipes
+WHERE author = $1
 LIMIT $2
 OFFSET $3
 `
 
 type ListRecipesByAuthorParams struct {
-	AuthorID pgtype.UUID `json:"author_id"`
-	Limit    int32       `json:"limit"`
-	Offset   int32       `json:"offset"`
+	Author string `json:"author"`
+	Limit  int32  `json:"limit"`
+	Offset int32  `json:"offset"`
 }
 
 func (q *Queries) ListRecipesByAuthor(ctx context.Context, arg ListRecipesByAuthorParams) ([]Recipe, error) {
-	rows, err := q.db.Query(ctx, listRecipesByAuthor, arg.AuthorID, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, listRecipesByAuthor, arg.Author, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func (q *Queries) ListRecipesByAuthor(ctx context.Context, arg ListRecipesByAuth
 		var i Recipe
 		if err := rows.Scan(
 			&i.ID,
-			&i.AuthorID,
+			&i.Author,
 			&i.Visibility,
 			&i.Data,
 			&i.CreatedAt,
@@ -160,15 +160,15 @@ func (q *Queries) ListRecipesByAuthor(ctx context.Context, arg ListRecipesByAuth
 const updateRecipe = `-- name: UpdateRecipe :one
 UPDATE recipes
 SET 
-    author_id = COALESCE($1, author_id),
+    author = COALESCE($1, author),
     visibility = COALESCE($2, visibility),
     data = COALESCE($3, data)
 WHERE id = $4
-RETURNING id, author_id, visibility, data, created_at, updated_at
+RETURNING id, author, visibility, data, created_at, updated_at
 `
 
 type UpdateRecipeParams struct {
-	AuthorID   pgtype.UUID `json:"author_id"`
+	Author     string      `json:"author"`
 	Visibility int32       `json:"visibility"`
 	Data       []byte      `json:"data"`
 	ID         pgtype.UUID `json:"id"`
@@ -176,7 +176,7 @@ type UpdateRecipeParams struct {
 
 func (q *Queries) UpdateRecipe(ctx context.Context, arg UpdateRecipeParams) (Recipe, error) {
 	row := q.db.QueryRow(ctx, updateRecipe,
-		arg.AuthorID,
+		arg.Author,
 		arg.Visibility,
 		arg.Data,
 		arg.ID,
@@ -184,7 +184,7 @@ func (q *Queries) UpdateRecipe(ctx context.Context, arg UpdateRecipeParams) (Rec
 	var i Recipe
 	err := row.Scan(
 		&i.ID,
-		&i.AuthorID,
+		&i.Author,
 		&i.Visibility,
 		&i.Data,
 		&i.CreatedAt,
