@@ -1,4 +1,7 @@
 name: ci-deploy 
+permissions:
+  id-token: write
+  contents: read
 
 on:
   push:
@@ -8,6 +11,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
       - name: Checkout repo
         uses: actions/checkout@v3
 
