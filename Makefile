@@ -1,6 +1,9 @@
 postgres:
-	docker run --name postgres -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres
+	docker run --name postgres --network hb-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres
 
+backend:
+	docker run --name HB-Backend --network hb-network -e DB_SOURCE="postgresql://root:secret@postgres:5432/homebuddy?sslmode=disable" -e GIN_MODE=release -p 8080:8080 hb:latest
+	
 createdb:
 	docker exec -it postgres createdb --username=root --owner=root homebuddy
 
