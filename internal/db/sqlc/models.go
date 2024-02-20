@@ -31,7 +31,7 @@ type Inventory struct {
 
 type Recipe struct {
 	ID         pgtype.UUID        `json:"id"`
-	AuthorID   pgtype.UUID        `json:"author_id"`
+	Author     string             `json:"author"`
 	Visibility int32              `json:"visibility"`
 	Data       []byte             `json:"data"`
 	CreatedAt  pgtype.Timestamptz `json:"created_at"`

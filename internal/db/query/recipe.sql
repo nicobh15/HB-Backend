@@ -1,6 +1,6 @@
 -- name: CreateRecipe :one
 INSERT INTO recipes (
-    author_id, visibility, data
+    author, visibility, data
     ) VALUES ( 
         $1, $2, $3
     ) RETURNING *;
@@ -12,7 +12,7 @@ LIMIT 1;
 
 -- name: ListRecipesByAuthor :many
 SELECT * FROM recipes
-WHERE author_id = $1
+WHERE author = $1
 LIMIT $2
 OFFSET $3;
 
@@ -24,7 +24,7 @@ OFFSET $2;
 -- name: UpdateRecipe :one
 UPDATE recipes
 SET 
-    author_id = COALESCE($1, author_id),
+    author = COALESCE($1, author),
     visibility = COALESCE($2, visibility),
     data = COALESCE($3, data)
 WHERE id = $4

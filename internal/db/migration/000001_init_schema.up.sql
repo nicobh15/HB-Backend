@@ -35,7 +35,7 @@ CREATE TABLE "inventory" (
 
 CREATE TABLE "recipes" (
   "id" UUID PRIMARY KEY DEFAULT (uuid_generate_v4()),
-  "author_id" UUID NOT NULL,
+  "author" varchar NOT NULL,
   "visibility" int NOT NULL DEFAULT '0',
   "data" jsonb,
   "created_at" timestamptz DEFAULT (now()),
@@ -58,4 +58,4 @@ ALTER TABLE "users" ADD FOREIGN KEY ("household_id") REFERENCES "households" ("h
 
 ALTER TABLE "inventory" ADD FOREIGN KEY ("household_id") REFERENCES "households" ("household_id");
 
-ALTER TABLE "recipes" ADD FOREIGN KEY ("author_id") REFERENCES "users" ("user_id");
+ALTER TABLE "recipes" ADD FOREIGN KEY ("author") REFERENCES "users" ("username");
