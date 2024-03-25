@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
+	"github.com/nicobh15/hb-backend/internal/util"
 )
 
 var testQueries *Queries

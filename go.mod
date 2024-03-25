@@ -1,4 +1,4 @@
-module github.com/nicobh15/HomeBuddy-Backend
+module github.com/nicobh15/hb-backend
 
 go 1.21
 

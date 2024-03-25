@@ -5,13 +5,13 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/api"
-	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
+	"github.com/nicobh15/hb-backend/internal/api"
+	db "github.com/nicobh15/hb-backend/internal/db/sqlc"
+	"github.com/nicobh15/hb-backend/internal/util"
 )
 
 // const (
-// 	dbSource      = "postgresql://root:secret@localhost:5432/homebuddy?sslmode=disable"
+// 	dbSource      = "postgresql://root:secret@localhost:5432/hb?sslmode=disable"
 // 	serverAddress = "0.0.0.0:8080"
 // )
 

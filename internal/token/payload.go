@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
+	db "github.com/nicobh15/hb-backend/internal/db/sqlc"
 )
 
 var (

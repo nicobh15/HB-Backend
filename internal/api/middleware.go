@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/token"
+	"github.com/nicobh15/hb-backend/internal/token"
 )
 
 const (

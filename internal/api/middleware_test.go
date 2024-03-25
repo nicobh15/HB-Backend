@@ -8,7 +8,7 @@ package api
 // 	"time"
 
 // 	"github.com/gin-gonic/gin"
-// 	"github.com/nicobh15/HomeBuddy-Backend/internal/token"
+// 	"github.com/nicobh15/hb-backend/internal/token"
 // 	"github.com/stretchr/testify/require"
 // )
 
