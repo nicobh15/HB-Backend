@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
+	"github.com/nicobh15/hb-backend/internal/util"
 	"github.com/stretchr/testify/require"
 )
 

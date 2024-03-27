@@ -4,9 +4,9 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/token"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
+	db "github.com/nicobh15/hb-backend/internal/db/sqlc"
+	"github.com/nicobh15/hb-backend/internal/token"
+	"github.com/nicobh15/hb-backend/internal/util"
 )
 
 // TODO - Add recipes API

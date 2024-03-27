@@ -2,19 +2,19 @@ postgres:
 	docker run --name postgres --network hb-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres
 
 backend:
-	docker run --name HB-Backend --network hb-network -e DB_SOURCE="postgresql://root:secret@postgres:5432/homebuddy?sslmode=disable" -e GIN_MODE=release -p 8080:8080 hb:latest
+	docker run --name HB-Backend --network hb-network -e DB_SOURCE="postgresql://root:secret@postgres:5432/hb?sslmode=disable" -e GIN_MODE=release -p 8080:8080 hb:latest
 	
 createdb:
-	docker exec -it postgres createdb --username=root --owner=root homebuddy
+	docker exec -it postgres createdb --username=root --owner=root hb
 
 dropdb:
-	docker exec -it postgres dropdb homebuddy
+	docker exec -it postgres dropdb hb
 
 migrateup:
-	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/homebuddy?sslmode=disable" -verbose up
+	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/hb?sslmode=disable" -verbose up
 
 migratedown:
-	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/homebuddy?sslmode=disable" -verbose down
+	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/hb?sslmode=disable" -verbose down
 
 sqlc:
 	sqlc generate

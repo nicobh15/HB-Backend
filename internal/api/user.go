@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
-	token "github.com/nicobh15/HomeBuddy-Backend/internal/token"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/util"
+	db "github.com/nicobh15/hb-backend/internal/db/sqlc"
+	token "github.com/nicobh15/hb-backend/internal/token"
+	"github.com/nicobh15/hb-backend/internal/util"
 )
 
 type createUserRequest struct {

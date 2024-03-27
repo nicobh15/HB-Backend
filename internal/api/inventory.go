@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/nicobh15/HomeBuddy-Backend/internal/db/sqlc"
-	"github.com/nicobh15/HomeBuddy-Backend/internal/token"
+	db "github.com/nicobh15/hb-backend/internal/db/sqlc"
+	"github.com/nicobh15/hb-backend/internal/token"
 )
 
 type createInventoryItemRequest struct {
