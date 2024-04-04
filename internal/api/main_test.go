@@ -1,29 +1,30 @@
 package api
 
-// import (
-// 	"os"
-// 	"testing"
-// 	"time"
+import (
+	"os"
+	"testing"
+	"time"
 
-// 	"github.com/gin-gonic/gin"
-// 	db "github.com/nicobh15/hb-backend/internal/db/sqlc"
-// 	"github.com/nicobh15/hb-backend/internal/util"
-// 	"github.com/stretchr/testify/require"
-// )
+	"github.com/gin-gonic/gin"
+	db "github.com/nicobh15/hb-backend/internal/db/sqlc"
+	"github.com/nicobh15/hb-backend/internal/util"
+	"github.com/stretchr/testify/require"
+)
 
-// func newTestServer(t *testing.T, store *db.Store) *Server {
-// 	config := util.Config{
-// 		TokenSymmetricKey:   util.RandomString(32),
-// 		AccessTokenDuration: time.Minute,
-// 	}
-// 	server, err := NewServer(config, store)
-// 	require.NoError(t, err)
+func newTestServer(t *testing.T, store db.Store) *Server {
+	config := util.Config{
+		TokenSymmetricKey:   util.RandomString(32),
+		AccessTokenDuration: time.Minute,
+	}
 
-// 	return server
-// }
+	server, err := NewServer(config, store)
+	require.NoError(t, err)
 
-// func TestMain(m *testing.M) {
-// 	gin.SetMode(gin.TestMode)
+	return server
+}
 
-// 	os.Exit(m.Run())
-// }
+func TestMain(m *testing.M) {
+	gin.SetMode(gin.TestMode)
+
+	os.Exit(m.Run())
+}

@@ -11,13 +11,16 @@ dropdb:
 	docker exec -it postgres dropdb hb
 
 migrateup:
-	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/hb?sslmode=disable" -verbose up
+	migrate -path internal/db/migration -database 'postgresql://root:secret@localhost:5432/hb?sslmode=disable' -verbose up
 
 migratedown:
 	migrate -path internal/db/migration -database "postgresql://root:secret@localhost:5432/hb?sslmode=disable" -verbose down
 
 sqlc:
 	sqlc generate
+
+mock:
+	mockgen -package mockdb -destination internal/db/mock/store.go github.com/nicobh15/hb-backend/internal/db/sqlc Store
 
 test:
 	go test -v -cover ./...

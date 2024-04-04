@@ -17,12 +17,12 @@ import (
 
 type Server struct {
 	config     util.Config
-	store      *db.SQLStore
+	store      db.Store
 	tokenMaker token.Maker
 	router     *gin.Engine
 }
 
-func NewServer(config util.Config, store *db.SQLStore) (*Server, error) {
+func NewServer(config util.Config, store db.Store) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 
 	if err != nil {
